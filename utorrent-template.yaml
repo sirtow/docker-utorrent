@@ -1,0 +1,205 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: my_template
+objects:
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-settings"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "50Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-settings"
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    generation: 1
+    labels:
+      build: docker-utorrent
+    name: docker-utorrent
+  spec:
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: docker-utorrent
+    name: docker-utorrent
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: docker-utorrent:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: openshift
+        uri: https://github.com/sirtow/docker-utorrent.git
+      type: Git
+    strategy:
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: mzaUASLPQTUgNRYpkvR_
+      type: GitHub
+    - generic:
+        secret: 4QlTYJvfTb1O2PkvAdSH
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: docker-utorrent
+    name: docker-utorrent
+  spec:
+    replicas: 1
+    selector:
+      app: docker-utorrent
+      deploymentconfig: docker-utorrent
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftWebConsole
+        creationTimestamp: null
+        labels:
+          app: docker-utorrent
+          deploymentconfig: docker-utorrent
+      spec:
+        volumes:
+         - name: utorrent-settings
+           persistentVolumeClaim:
+            claimName: "utorrent-settings"
+         - emptyDir: {}
+           name: docker-utorrent-1
+
+        containers:
+        - image: docker-utorrent:latest
+          imagePullPolicy: Always
+          name: docker-utorrent
+          ports:
+          - containerPort: 6881
+            protocol: TCP
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /media
+            name: docker-utorrent-1
+          - mountPath: /settings
+            name: utorrent-settings
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - docker-utorrent
+        from:
+          kind: ImageStreamTag
+          name: docker-utorrent:latest
+          namespace: milky
+      type: ImageChange
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftWebConsole
+    creationTimestamp: null
+    labels:
+      app: docker-utorrent
+    name: docker-utorrent
+  spec:
+    ports:
+    - name: 6881-tcp
+      port: 6881
+      protocol: TCP
+      targetPort: 6881
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: docker-utorrent
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: docker-utorrent
+    name: ut
+  spec:
+    host: ut-milky.os.milky
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: docker-utorrent
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2017-12-30T07:46:23Z
+        status: "True"
+        type: Admitted
+      host: ut-milky.os.milky
+      routerName: router
+      wildcardPolicy: None
