@@ -28,7 +28,7 @@ fi
 #
 # Finally, start utorrent.
 #
-
+id
 echo 'Starting utorrent server...'
 #exec ./utserver -settingspath /settings -logfile /settings/utserver.log
 ./utserver  -settingspath /settings/

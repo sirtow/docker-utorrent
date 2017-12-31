@@ -5,11 +5,13 @@ MAINTAINER Dominique Barton
 # Create user and group for utorrent.
 #
 
+RUN useradd -r -u 1009 -g 100 -d /utorrent -m utorrent
+
 
 #
 # Add utorrent init script.
 #
-RUN mkdir /utorrent
+RUN mkdir -p /utorrent
 ADD utorrent.sh /utorrent.sh
 #RUN chown utorrent: /utorrent.sh \
 #    && chmod 755 /utorrent.sh
@@ -59,5 +61,6 @@ RUN chmod 777 -R /mnt/FS
 
 WORKDIR /utorrent
 
+USER utorrent
 
 CMD ["/utorrent.sh"]

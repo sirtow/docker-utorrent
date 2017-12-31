@@ -1,14 +1,151 @@
 apiVersion: v1
-kind: PersistentVolume
+kind: Template
 metadata:
-  name: utorrent-pv-settings
-  labels:
-    pv-role: utorrent-settings
-spec:
-  capacity:
-    storage: 50Mi
-  accessModes:
-  - ReadWriteOnce
-  nfs:
-    path: /mnt/mirror/data/utorrent
-    server: pluto.milky
+  creationTimestamp: null
+  name: utorrent-pvs
+objects:
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-settings
+    name: utorrent-pv-settings
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 50Mi
+    claimRef:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      name: utorrent-settings
+      namespace: milky
+      resourceVersion: "452344"
+      uid: 2c3e6374-ed3c-11e7-88a7-08002737f846
+    nfs:
+      path: /mnt/mirror/data/utorrent
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-storage-movies
+    name: utorrent-storage-movies
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 100Mi
+    nfs:
+      path: /mnt/vol1/Movies
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}
+
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-storage-series
+    name: utorrent-storage-series
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 100Mi
+    nfs:
+      path: /mnt/vol1/Series
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}
+
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-storage-clips
+    name: utorrent-storage-clips
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 100Mi
+    nfs:
+      path: /mnt/vol1/Clips
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}
+
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-storage-kids
+    name: utorrent-storage-kids
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 100Mi
+    nfs:
+      path: "/mnt/vol1/Kids movies"
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}
+
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-storage-movies
+    name: utorrent-storage-movies
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 100Mi
+    nfs:
+      path: /mnt/vol1/Music
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}
+
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    annotations:
+      pv.kubernetes.io/bound-by-controller: "yes"
+    creationTimestamp: null
+    labels:
+      pv-role: utorrent-storage-tosort
+    name: utorrent-storage-tosort
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    capacity:
+      storage: 100Mi
+    nfs:
+      path: /mnt/vol1/tosort
+      server: pluto.milky
+    persistentVolumeReclaimPolicy: Retain
+  status: {}

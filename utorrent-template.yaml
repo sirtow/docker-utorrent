@@ -17,12 +17,88 @@ objects:
     selector:
       matchLabels:
         pv-role: "utorrent-settings"
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-storage-clips"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "100Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-storage-clips"
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-storage-movies"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "100Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-storage-movies"
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-storage-series"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "100Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-storage-series"
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-storage-kids"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "100Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-storage-kids"
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-storage-music"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "100Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-storage-music"
+- kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: "utorrent-storage-tosort"
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: "100Mi"
+    selector:
+      matchLabels:
+        pv-role: "utorrent-storage-tosort"
 - apiVersion: v1
   kind: ImageStream
   metadata:
     annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
     generation: 1
     labels:
       build: docker-utorrent
@@ -34,13 +110,11 @@ objects:
   kind: BuildConfig
   metadata:
     annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
     labels:
       build: docker-utorrent
     name: docker-utorrent
   spec:
-    failedBuildsHistoryLimit: 5
+    failedBuildsHistoryLimit: 1
     nodeSelector: null
     output:
       to:
@@ -56,7 +130,7 @@ objects:
       type: Git
     strategy:
       type: Docker
-    successfulBuildsHistoryLimit: 5
+    successfulBuildsHistoryLimit: 1
     triggers:
     - github:
         secret: mzaUASLPQTUgNRYpkvR_
@@ -107,8 +181,25 @@ objects:
          - name: utorrent-settings
            persistentVolumeClaim:
             claimName: "utorrent-settings"
-         - emptyDir: {}
-           name: docker-utorrent-1
+         - name: utorrent-storage-movies
+           persistentVolumeClaim:
+            claimName: "utorrent-storage-movies"
+         - name: utorrent-storage-series
+           persistentVolumeClaim:
+            claimName: "utorrent-storage-series"
+         - name: utorrent-storage-kids
+           persistentVolumeClaim:
+            claimName: "utorrent-storage-kids"
+         - name: utorrent-storage-clips
+           persistentVolumeClaim:
+            claimName: "utorrent-storage-clips"
+         - name: utorrent-storage-music
+           persistentVolumeClaim:
+            claimName: "utorrent-storage-music"
+         - name: utorrent-storage-tosort
+           persistentVolumeClaim:
+            claimName: "utorrent-storage-tosort"
+
 
         containers:
         - image: docker-utorrent:latest
@@ -123,10 +214,20 @@ objects:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
-          - mountPath: /media
-            name: docker-utorrent-1
           - mountPath: /settings
             name: utorrent-settings
+          - mountPath: /mnt/FS/Movies
+            name: utorrent-storage-movies
+          - mountPath: /mnt/FS/Series
+            name: utorrent-storage-series
+          - mountPath: /mnt/FS/Clips
+            name: utorrent-storage-clips
+          - mountPath: /mnt/FS/Kids movies"
+            name: utorrent-storage-kids
+          - mountPath: /mnt/FS/Music
+            name: utorrent-storage-music
+          - mountPath: /mnt/FS/tosort
+            name: utorrent-storage-tosort
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
@@ -162,14 +263,10 @@ objects:
     name: docker-utorrent
   spec:
     ports:
-    - name: 6881-tcp
-      port: 6881
+    - name: 7777-tcp
+      port: 7777
       protocol: TCP
-      targetPort: 6881
-    - name: 8080-tcp
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
+      targetPort: 7777
     selector:
       deploymentconfig: docker-utorrent
     sessionAffinity: None
@@ -186,20 +283,12 @@ objects:
       app: docker-utorrent
     name: ut
   spec:
-    host: ut-milky.os.milky
+    host: ut.os.milky
     port:
-      targetPort: 8080-tcp
+      targetPort: 7777
     to:
       kind: Service
       name: docker-utorrent
       weight: 100
     wildcardPolicy: None
   status:
-    ingress:
-    - conditions:
-      - lastTransitionTime: 2017-12-30T07:46:23Z
-        status: "True"
-        type: Admitted
-      host: ut-milky.os.milky
-      routerName: router
-      wildcardPolicy: None
